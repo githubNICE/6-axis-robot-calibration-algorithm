@@ -1,0 +1,126 @@
+theta=sym('theta',[1,6]);
+alpha=sym('alpha',[1,6]);
+a=sym('a',[1,6]);
+d=sym('d',[1,6]);
+
+beta=sym('beta',[1,6]);
+Dtheta=sym('Dtheta',[1,6]);
+Dalpha=sym('Dalpha',[1,6]);
+Da=sym('Da',[1,6]);
+Dd=sym('Dd',[1,6]);
+Dbeta=sym('Dbeta',[1,6]);
+DD1=pinv(jj)*e;
+
+DDD1=[DD1(1:4),DD1(5:8),DD1(9:12),DD1(13:16),DD1(17:20),DD1(21:24)];
+[ a1, a2, a3, a4, a5, a6]=deal(0,365 ,235 ,300 ,0,0 );
+[ alpha1, alpha2, alpha3, alpha4, alpha5, alpha6]=deal(0, 0 ,0 , pi/2 ,pi/2,0);
+[ d1, d2, d3, d4, d5, d6]=deal(500,d(2), -143.97, 0,0,100);
+[theta1, theta2, theta3, theta4, theta5, theta6]=deal(theta(1), 0, theta(3), theta(4), theta(5), theta(6));
+Ba=a+DDD1(1,1:6);
+Balpha=alpha+DDD1(2,1:6);
+Btheta=theta+DDD1(3,1:6);
+Bd=d+DDD1(4,1:6);
+RRtheta=theta+Dtheta;
+RRalpha=alpha+Dalpha;
+RRa=a+Da;
+RRd=d+Dd;
+RT1=cell(1,6);
+BT=cell(1,6);
+for i=1:6
+    BT{i}=subs(trotz(Btheta(i))*transl(0,0,Bd(i))*transl(Ba(i),0,0)*trotx(Balpha(i)));
+end
+M{1}= ((BT{1}*BT{2}*BT{3}*BT{4}*BT{5}*BT{6}));
+for i=1:6
+    RT1{i}=subs(trotz(RRtheta(i))*transl(0,0,RRd(i))*transl(RRa(i),0,0)*trotx(RRalpha(i)));
+end
+R1=(RT1{1}*RT1{2}*RT1{3}*RT1{4}*RT1{5}*RT1{6})+extraE;
+EEER=cell(1,n);
+jgg1=cell(1,n);
+RR1=cell(1,n);
+for i=1:n
+    theta1=deg2rad(q{i}(1));
+    d2=q{i}(2);
+    theta3=deg2rad(q{i}(3));
+    theta4=deg2rad(q{i}(4));
+    theta5=deg2rad(q{i}(5));
+    theta6=deg2rad(q{i}(6));
+    RRR1=subs(R1);
+    RR1{i}=RRR1(1:3,4);
+    K=subs(R1-M{1});
+    %K=subs(M1{1}-M{1});
+    %vpa(subs(R{1}));
+    EEER{i}(1:3,1)=K(1:3,4);
+    EEER{i}(4,1)=K(3,2);
+    EEER{i}(5,1)=K(1,3);
+    EEER{i}(6,1)=K(2,1);
+    jgg1{i}=subs(EE);
+end
+%e1=cat(1,EEER{:});
+
+jj=cat(1,jgg1{:});
+e=cat(1,EEER{:});
+
+figure(1)
+eeeee=cat(2,EEER{:});
+x=eeeee(1,1:n);
+y=eeeee(2,1:n);
+z=eeeee(3,1:n);
+plot3(x,y,z,'g.');
+title('補償前的誤差');
+xlabel('x');
+ylabel('y');
+zlabel('z');
+hold on
+
+
+
+figure(2)
+aaaa=zeros(1,n);
+for i=1: length(q)
+    aaaa(i)=sqrt(EEER{i}(2).^2+EEER{i}(1).^2+EEER{i}(3).^2);
+end
+
+t=1:n;
+plot(t,aaaa,'g+:');
+title('補償前的誤差距离')
+hold on
+[aa2,b2]=max(aaaa);
+plot(b2,aa2,'r*');
+text(b2,aa2,num2str(aa2));
+hold on
+[aa2,b2]=min(aaaa);
+plot(b2,aa2,'r*');
+text(b2,aa2,num2str(aa2));
+hold on
+aa2=mean(aaaa);
+line([1,n],[aa2,aa2])
+text(0,aa2,num2str(aa2))
+fprintf('Max=%f\n',max(aaaa))
+fprintf('Min=%f\n',min(aaaa))
+fprintf('Mean=%f\n',mean(aaaa))
+
+eeeeee1=cat(2,RR1{:});
+rx=eeeeee1(1,1:n);
+ry=eeeeee1(2,1:n);
+rz=eeeeee1(3,1:n);
+figure(3)
+plot3(rx,ry,rz,'r*');
+
+figure(8)
+aaaa=zeros(1,n);
+for i=1: length(q)
+    aaaa(i)=sqrt(EEER{i}(2).^2+EEER{i}(1).^2+EEER{i}(3).^2);
+end
+
+t=1:n;
+plot(t,aaaa,'g+:');
+title('補償后的誤差（距離）')
+hold on
+[aa2,b2]=max(aaaa);
+plot(b2,aa2,'r*');
+text(b2,aa2,num2str(aa2));
+hold on
+[aa2,b2]=min(aaaa);
+plot(b2,aa2,'r*');
+text(b2,aa2,num2str(aa2));
+hold on
